@@ -1,7 +1,8 @@
 package org.ansj.crf;
 
-import org.ansj.splitWord.WordAlert;
+import org.nlpcn.commons.lang.util.WordAlert;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -100,7 +101,7 @@ public class SplitWord {
     }
 
     private List<Element> vterbi(final String line) {
-        final List<Element> elements = WordAlert.str2Elements(line);
+        final List<Element> elements = str2Elements(line);
 
         final int length = elements.size();
         if (length == 0) { // 避免空list，下面get(0)操作越界
@@ -181,7 +182,7 @@ public class SplitWord {
             return Integer.MIN_VALUE;
         }
 
-        final List<Element> elements = WordAlert.str2Elements(word);
+        final List<Element> elements = str2Elements(word);
         for (int i = 0; i < elements.size(); i++) {
             computeTagScore(elements, i);
         }
@@ -195,5 +196,57 @@ public class SplitWord {
         value += elements.get(len).tagScore(revTagConver[3]);
 
         return value < 0 ? 1 : value + 1;
+    }
+
+    /**
+     * @param str
+     * @return
+     */
+    public static List<Element> str2Elements(String str) {
+        if (str == null || str.trim().length() == 0) {
+            return Collections.emptyList();
+        }
+
+        final char[] chars = WordAlert.alertStr(str);
+        final int maxLen = chars.length - 1;
+        List<Element> list = new ArrayList<>();
+        Element element;
+        out:
+        for (int i = 0; i < chars.length; i++) {
+            if (chars[i] >= '0' && chars[i] <= '9') {
+                element = new Element('M');
+                list.add(element);
+                if (i == maxLen) {
+                    break out;
+                }
+                char c = chars[++i];
+                while (c == '.' || c == '%' || (c >= '0' && c <= '9')) {
+                    if (i == maxLen) {
+                        break out;
+                    }
+                    c = chars[++i];
+                    element = element.withLenPlusOne();
+                }
+                i--;
+            } else if (chars[i] >= 'a' && chars[i] <= 'z') {
+                element = new Element('W');
+                list.add(element);
+                if (i == maxLen) {
+                    break out;
+                }
+                char c = chars[++i];
+                while (c >= 'a' && c <= 'z') {
+                    if (i == maxLen) {
+                        break out;
+                    }
+                    c = chars[++i];
+                    element = element.withLenPlusOne();
+                }
+                i--;
+            } else {
+                list.add(new Element(chars[i]));
+            }
+        }
+        return list;
     }
 }

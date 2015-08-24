@@ -2,11 +2,12 @@ package org.ansj.keyword;
 
 import com.google.common.collect.ImmutableMap;
 import org.ansj.Term;
+import org.nlpcn.commons.lang.util.WordAlert;
 
 import java.util.*;
 
-import static org.ansj.splitWord.NlpAnalysis.nlpParse;
 import static org.ansj.AnsjContext.TAB;
+import static org.ansj.splitWord.NlpAnalysis.nlpParse;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class KeyWordComputer {
@@ -51,7 +52,9 @@ public class KeyWordComputer {
 
         for (final Term term : nlpParse(content)) {
             final double weight = getWeight(term, content.length(), titleLength);
-            if (weight != 0) {
+            // 判断是否是数字
+            char c = WordAlert.CharCover(term.getName().charAt(0));
+            if (weight != 0 && c < '0' && c > '9') {
                 final Keyword keyword = termMap.get(term.getName());
                 if (keyword != null) {
                     keyword.updateWeight(1);

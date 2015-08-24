@@ -3,9 +3,7 @@ package org.ansj.recognition;
 import org.ansj.Term;
 import org.ansj.TermNature;
 import org.ansj.TermNatures;
-import deprecated.Branch;
 import org.nlpcn.commons.lang.tire.domain.Forest;
-import deprecated.WoodInterface;
 
 import java.util.List;
 
@@ -22,10 +20,10 @@ import static org.ansj.AnsjContext.CONTEXT;
 public class UserDefineRecognition {
 
     private final Term[] terms;
-    private final List<WoodInterface<String[], Branch>> forests;
+    private final List<Forest> forests;
 
-    private WoodInterface<String[], Branch> forest;
-    private WoodInterface<String[], Branch> branch;
+    private Forest forest;
+    private Forest branch;
 
     private int offe = -1;
     private int endOffe = -1;
@@ -51,7 +49,7 @@ public class UserDefineRecognition {
     }
 
     public void recognition() {
-        for (final WoodInterface<String[], Branch> forest : this.forests) {
+        for (final Forest forest : this.forests) {
             if (forest == null) {
                 continue;
             }
@@ -131,8 +129,8 @@ public class UserDefineRecognition {
      * @param term   term
      * @return branch
      */
-    private WoodInterface<String[], Branch> termStatus(final WoodInterface<String[], Branch> branch, final Term term) {
-        WoodInterface<String[], Branch> b = branch;
+    private Forest termStatus(final Forest branch, final Term term) {
+        Forest b = branch;
         for (int j = 0; j < term.length(); j++) {
             b = b.getBranch(term.charAt(j));
             if (b == null) {

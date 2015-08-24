@@ -69,8 +69,8 @@ public final class UserLibrary {
         return this.getParams(word) != null;
     }
 
-    public static String[] getParams(final WoodInterface<String[], Branch> forest, final String word) {
-        WoodInterface<String[], Branch> pointer = forest;
+    public static String[] getParams(final Forest forest, final String word) {
+        Forest pointer = forest;
         for (final char ch : word.toCharArray()) {
             pointer = pointer.getBranch(ch);
             if (pointer == null) {

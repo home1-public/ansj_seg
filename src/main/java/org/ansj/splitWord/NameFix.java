@@ -2,6 +2,7 @@ package org.ansj.splitWord;
 
 import org.ansj.Term;
 import org.ansj.TermNatures;
+import org.nlpcn.commons.lang.util.WordAlert;
 
 public class NameFix {
 

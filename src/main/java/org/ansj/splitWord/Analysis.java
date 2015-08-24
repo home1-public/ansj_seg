@@ -6,6 +6,7 @@ import org.ansj.TermNatures;
 import org.ansj.library.CoreDictionary;
 import org.nlpcn.commons.lang.tire.GetWord;
 import org.nlpcn.commons.lang.tire.domain.Forest;
+import org.nlpcn.commons.lang.util.WordAlert;
 
 import java.io.IOException;
 import java.io.Reader;

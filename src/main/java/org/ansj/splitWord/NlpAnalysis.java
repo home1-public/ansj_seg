@@ -18,6 +18,7 @@ import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.ansj.AnsjContext.CONTEXT;
+import org.nlpcn.commons.lang.util.WordAlert;
 
 /**
  * 自然语言分词,具有未登录词发现功能。建议在自然语言理解中用。搜索中不要用
@@ -74,7 +75,7 @@ public class NlpAnalysis extends Analysis {
         List<String> words = crfSplitWord.cut(graph.chars);
 
         for (String word : words) {
-            if (word.length() < 2 || dat.isInSystemDic(word) || WordAlert.isRuleWord(word)) {
+            if (word.length() < 2 || dat.isInSystemDic(word) || isRuleWord(word)) {
                 continue;
             }
             learn.addTerm(new NewWord(word, natureLibrary.getNature("nw")), crfSplitWord);
@@ -104,6 +105,23 @@ public class NlpAnalysis extends Analysis {
 
         return result;
     }
+
+    /**
+     //	 * 判断新词识别出来的词是否可信
+     //	 *
+     //	 * @param word
+     //	 * @return
+     //	 */
+	public static boolean isRuleWord(String word) {
+		char c = 0;
+		for (int i = 0; i < word.length(); i++) {
+			c = word.charAt(i);
+			if (c < 256 || (c = WordAlert.CharCover(word.charAt(i))) > 0 && c != '·') {
+				return true;
+			}
+		}
+		return false;
+	}
 
     static List<Term> getResult2(final Graph graph) {
         final List<Term> result = new ArrayList<>();

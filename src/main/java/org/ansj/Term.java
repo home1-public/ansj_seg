@@ -2,6 +2,7 @@ package org.ansj;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.nlpcn.commons.lang.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -131,6 +132,20 @@ public class Term implements Comparable<Term> {
     private void setFromAndScore(final Term from, final double score) {
         this.from = from;
         this.score = score;
+    }
+
+    /**
+     * 进行term合并
+     *
+     * @param to
+     */
+    public Term merage(Term to) {
+        this.name = this.name + to.getName();
+        if (StringUtil.isNotBlank(this.realName) && StringUtil.isNotBlank(to.getRealName())) {
+            this.realName = this.realName + to.getRealName();
+        }
+        this.setTo(to.to);
+        return this;
     }
 
     /**
