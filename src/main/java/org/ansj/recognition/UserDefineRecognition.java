@@ -3,9 +3,9 @@ package org.ansj.recognition;
 import org.ansj.Term;
 import org.ansj.TermNature;
 import org.ansj.TermNatures;
-import org.nlpcn.commons.lang.tire.domain.Branch;
+import deprecated.Branch;
 import org.nlpcn.commons.lang.tire.domain.Forest;
-import org.nlpcn.commons.lang.tire.domain.WoodInterface;
+import deprecated.WoodInterface;
 
 import java.util.List;
 

@@ -1,14 +1,14 @@
 package org.ansj.ansj_lucene4_plug;
 
-import java.io.IOException;
-
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.PrefixQuery;
+
+import java.io.IOException;
 
 /**
  * Unit test for simple App.
  */
-public class AppTest {
+public class Lucene4PlugAppTest {
     public static void main(String[] args) throws IOException {
 //        Set<String> filter = new HashSet<String>() ;
 //        
@@ -26,7 +26,7 @@ public class AppTest {
 //            CharTermAttribute attribute = tokenizer.getAttribute(CharTermAttribute.class) ;
 //            System.out.println(attribute);
 //        }
-        PrefixQuery pq = new PrefixQuery(new Term("name","中国")) ;
+        PrefixQuery pq = new PrefixQuery(new Term("name", "中国"));
         System.out.println(pq);
     }
 }

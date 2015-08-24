@@ -1,18 +1,16 @@
-package org.ansj.ansj_lucene5_plug;
+package org.ansj.ansj_lucene4_plug;
+
 
 import org.ansj.lucene.util.PorterStemmer;
-import org.ansj.lucene5.AnsjIndexAnalysis;
-import org.ansj.lucene5.AnsjQueryAnalysis;
+import org.ansj.lucene4.AnsjIndexAnalysis;
+import org.ansj.lucene4.AnsjQueryAnalysis;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.index.CorruptIndexException;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.*;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
@@ -25,6 +23,7 @@ import org.apache.lucene.search.highlight.SimpleHTMLFormatter;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.store.RAMDirectory;
+import org.apache.lucene.util.Version;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -35,7 +34,7 @@ import java.util.HashSet;
 
 import static org.ansj.AnsjContext.CONTEXT;
 
-public class Lucene5PlugIndexTest {
+public class Lucene4PlugIndexTest {
 
     @Test
     public void test() throws IOException {
@@ -63,16 +62,19 @@ public class Lucene5PlugIndexTest {
     public void indexTest() throws CorruptIndexException, LockObtainFailedException, IOException, ParseException {
         // TODO 支持修改配置 CONTEXT().userLibrary = "/home/ansj/workspace/ansj_seg/library/default.dic";
 
-        final HashSet<String> hs = new HashSet<>();
+        HashSet<String> hs = new HashSet<String>();
         hs.add("的");
         Analyzer analyzer = new AnsjIndexAnalysis(hs, false);
+        Directory directory = null;
+        IndexWriter iwriter = null;
         String text = "季德胜蛇药片 10片*6板 ";
 
         CONTEXT().getUserLibrary().insertWord("蛇药片", "n", 1000);
 
-        IndexWriterConfig ic = new IndexWriterConfig(analyzer);
-        final Directory directory = new RAMDirectory();// 建立内存索引对象
-        final IndexWriter iwriter = new IndexWriter(directory, ic);
+        IndexWriterConfig ic = new IndexWriterConfig(Version.LUCENE_44, analyzer);
+        // 建立内存索引对象
+        directory = new RAMDirectory();
+        iwriter = new IndexWriter(directory, ic);
         addContent(iwriter, text);
         iwriter.commit();
         iwriter.close();
@@ -90,10 +92,10 @@ public class Lucene5PlugIndexTest {
     private void search(Analyzer queryAnalyzer, Directory directory, String queryStr) throws CorruptIndexException, IOException, ParseException {
         IndexSearcher isearcher;
 
-        DirectoryReader directoryReader = DirectoryReader.open(directory);
+        DirectoryReader directoryReader = IndexReader.open(directory);
         // 查询索引
         isearcher = new IndexSearcher(directoryReader);
-        QueryParser tq = new QueryParser("text", queryAnalyzer);
+        QueryParser tq = new QueryParser(Version.LUCENE_44, "text", queryAnalyzer);
         Query query = tq.parse(queryStr);
         System.out.println(query);
         TopDocs hits = isearcher.search(query, 5);

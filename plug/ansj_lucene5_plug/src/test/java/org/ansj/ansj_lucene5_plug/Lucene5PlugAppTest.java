@@ -1,9 +1,9 @@
 package org.ansj.ansj_lucene5_plug;
 
-import java.io.IOException;
-
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.PrefixQuery;
+
+import java.io.IOException;
 
 /**
  * Unit test for simple App.
@@ -26,7 +26,7 @@ public class Lucene5PlugAppTest {
 //            CharTermAttribute attribute = tokenizer.getAttribute(CharTermAttribute.class) ;
 //            System.out.println(attribute);
 //        }
-        PrefixQuery pq = new PrefixQuery(new Term("name","中国")) ;
+        PrefixQuery pq = new PrefixQuery(new Term("name", "中国"));
         System.out.println(pq);
     }
 }

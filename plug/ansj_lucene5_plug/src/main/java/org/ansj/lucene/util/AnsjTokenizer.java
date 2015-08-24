@@ -26,6 +26,7 @@ public class AnsjTokenizer extends Tokenizer {
      * 距离
      */
     private final PositionIncrementAttribute positionAttr;
+
     protected final Analysis ta;
     private final Set<String> filter;
     private final boolean pstemming;

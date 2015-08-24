@@ -1,85 +1,80 @@
 package org.ansj.lucene.util;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.util.Set;
-
-import org.ansj.domain.Term;
-import org.ansj.domain.TermNatures;
+import org.ansj.Term;
+import org.ansj.TermNatures;
 import org.ansj.splitWord.Analysis;
-import org.ansj.util.AnsjReader;
+import org.ansj.splitWord.AnsjReader;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 
+import java.io.IOException;
+import java.io.Reader;
+import java.util.Set;
+
 public class AnsjTokenizer extends Tokenizer {
-	// 当前词
-	private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
-	// 偏移量
-	private final OffsetAttribute offsetAtt = addAttribute(OffsetAttribute.class);
-	// 距离
-	private final PositionIncrementAttribute positionAttr = addAttribute(PositionIncrementAttribute.class);
 
-	protected Analysis ta = null;
-	private Set<String> filter;
-	private boolean pstemming;
+    /**
+     * 当前词
+     */
+    private final CharTermAttribute termAtt;
+    /**
+     * 偏移量
+     */
+    private final OffsetAttribute offsetAtt;
+    /**
+     * 距离
+     */
+    private final PositionIncrementAttribute positionAttr;
 
-	private final PorterStemmer stemmer = new PorterStemmer();
+    protected final Analysis ta;
+    private final Set<String> filter;
+    private final boolean pstemming;
+    private final PorterStemmer stemmer;
 
-	public AnsjTokenizer(Analysis ta, Reader input, Set<String> filter, boolean pstemming) {
-		super(input);
-		this.ta = ta;
-		this.filter = filter;
-		this.pstemming = pstemming;
-	}
+    public AnsjTokenizer(final Analysis ta, final Reader input, final Set<String> filter, final boolean pstemming) {
+        super(input);
+        this.termAtt = addAttribute(CharTermAttribute.class);
+        this.offsetAtt = addAttribute(OffsetAttribute.class);
+        this.positionAttr = addAttribute(PositionIncrementAttribute.class);
+        this.ta = ta;
+        this.filter = filter;
+        this.pstemming = pstemming;
+        this.stemmer = new PorterStemmer();
+    }
 
-	@Override
-	public final boolean incrementToken() throws IOException {
-		// TODO Auto-generated method stub
-		clearAttributes();
-		int position = 0;
-		Term term = null;
-		String name = null;
-		int length = 0;
-		boolean flag = true;
-		do {
-			term = ta.next();
-			if (term == null) {
-				break;
-			}
-			name = term.getName();
-			length = name.length();
-			if (pstemming && term.termNatures() == TermNatures.EN) {
-				name = stemmer.stem(name);
-				term.setName(name);
-			}
+    @Override
+    public final boolean incrementToken() throws IOException {
+        super.clearAttributes();
 
-			if (filter != null && filter.contains(name)) {
-				continue;
-			} else {
-				position++;
-				flag = false;
-			}
-		} while (flag);
+        int position = 0;
+        do {
+            final Term term = this.ta.next();
+            if (term == null) {
+                return false;
+            }
+            final int nameLength = term.getName().length();
+            final String name = !this.pstemming || term.getTermNatures() != TermNatures.EN ?
+                    term.getName() :
+                    this.stemmer.stem(term.getName());
 
-		if (term != null) {
-			positionAttr.setPositionIncrement(position);
-			termAtt.setEmpty().append(term.getName());
-			offsetAtt.setOffset(term.getOffe(), term.getOffe() + length);
-			return true;
-		} else {
-			return false;
-		}
-	}
+            if (this.filter == null || !this.filter.contains(name)) {
+                position++;
+                this.positionAttr.setPositionIncrement(position);
+                this.termAtt.setEmpty().append(name);
+                this.offsetAtt.setOffset(term.getOffe(), term.getOffe() + nameLength);
+                return true;
+            }
+        } while (true);
+    }
 
-	/**
-	 * 必须重载的方法，否则在批量索引文件时将会导致文件索引失败
-	 */
-	@Override
-	public void reset() throws IOException {
-		super.reset();
-		ta.resetContent(new AnsjReader(this.input));
-	}
-
+    /**
+     * 必须重载的方法，否则在批量索引文件时将会导致文件索引失败
+     */
+    @Override
+    public void reset() throws IOException {
+        super.reset();
+        this.ta.resetContent(new AnsjReader(this.input));
+    }
 }
