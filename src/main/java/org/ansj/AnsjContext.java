@@ -3,7 +3,6 @@ package org.ansj;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.SneakyThrows;
-import lombok.Synchronized;
 import lombok.experimental.Wither;
 import org.ansj.crf.Model;
 import org.ansj.crf.ModelSerializer;
@@ -53,23 +52,32 @@ public class AnsjContext {
     private static volatile AnsjContext _INSTANCE;
 
     public static AnsjContext CONTEXT() {
-        return _INSTANCE != null ? _INSTANCE : createIfNotExists();
-    }
-
-    @Synchronized
-    private static AnsjContext createIfNotExists() {
         if (_INSTANCE != null) {
             return _INSTANCE;
-        } else {
-            _INSTANCE = new AnsjContext(properties());
-            return _INSTANCE;
+        }
+        LIBRARYLOG.info("ansj context try lock");
+        synchronized (AnsjContext.class) {
+            LIBRARYLOG.info("ansj context locked");
+            if (_INSTANCE != null) {
+                LIBRARYLOG.info("ansj context exists");
+                return _INSTANCE;
+            } else {
+                LIBRARYLOG.info("ansj context load properties");
+                final ResourceBundle properties = properties();
+                LIBRARYLOG.info("ansj context properties loaded");
+                _INSTANCE = new AnsjContext(properties);
+                return _INSTANCE;
+            }
         }
     }
 
-    @Synchronized
     public static void refreshContext(final AnsjContext context) {
-        userLibraryRef.set(null);
-        _INSTANCE = context;
+        LIBRARYLOG.info("ansj refreshContext start");
+        synchronized (AnsjContext.class) {
+            userLibraryRef.set(null);
+            _INSTANCE = context;
+        }
+        LIBRARYLOG.info("ansj refreshContext end");
     }
 
     // 是否开启人名识别
@@ -119,7 +127,7 @@ public class AnsjContext {
     @SneakyThrows
     @SuppressWarnings("unchecked")
     private AnsjContext(final ResourceBundle properties) {
-        LIBRARYLOG.info("new AnsjContext");
+        LIBRARYLOG.info("ansj new context");
 
         this.nameRecognition = parseBoolean(property(properties, "nameRecognition", "true"));
         this.numRecognition = parseBoolean(property(properties, "numRecognition", "true"));
@@ -131,13 +139,16 @@ public class AnsjContext {
         this.userAmbiguityLibraryLocation = property(properties, "userAmbiguityLibraryLocation", "library/ambiguity.dic");
         this.crfModelLocation = property(properties, "crfModel", "library/crf.bz2");
         //
+        LIBRARYLOG.info("ansj load company.dic");
         this.companyAttrLibrary = new CompanyAttrLibrary(
                 rawLines(classpathResource("company/company.data"))
         );
+        LIBRARYLOG.info("ansj load person.dic");
         this.personAttrLibrary = new PersonAttrLibrary(
                 rawLines(classpathResource("person/person.dic")),
                 (Map<String, int[][]>) new ObjectInputStream(classpathResource("person/asian_name_freq.data")).readObject()//名字词性对象反序列化
         );
+        LIBRARYLOG.info("ansj load core.dic");
         final DoubleArrayTire coreDic = DoubleArrayTire.loadText(classpathResource("core.dic"), AnsjItem.class);
         this.coreDictionary = new CoreDictionary(this.personAttrLibrary, coreDic);
         this.ngramLibrary = new NgramLibrary(
@@ -228,17 +239,22 @@ public class AnsjContext {
     @SneakyThrows
     static ResourceBundle properties() {
         try {
+            LIBRARYLOG.info("ansj try to load properties from resourceBundle");
             return ResourceBundle.getBundle("library");
         } catch (final RuntimeException e) {
+            LIBRARYLOG.info("ansj error load properties from resourceBundle");
             // continue try
         }
-        final File found = FileFinder.find("library.properties");
-        if (found != null) {
+        LIBRARYLOG.info("ansj try to find library.properties");
+        //FileFinder在某些文件系统上运行时会卡死 FileFinder.find("library.properties");
+        final File found = new File("library/library.properties");
+        if (found != null && found.exists() && found.canRead()) {
             final String file = found.getAbsolutePath();
+            LIBRARYLOG.info("ansj library.properties found: " + file);
             //LIBRARYLOG.info("library.properties not find in classPath! found at " + file + " make sure it is your config!");
             return new PropertyResourceBundle(reader(filesystemResource(file), System.getProperty("file.encoding")));
         }
-        LIBRARYLOG.warning("library.properties not found use default config values.");
+        LIBRARYLOG.warning("ansj library.properties not found use default config values.");
         return null;
     }
 

@@ -2,10 +2,8 @@ package org.ansj.library;
 
 import lombok.Getter;
 import org.nlpcn.commons.lang.tire.GetWord;
-import deprecated.Branch;
 import org.nlpcn.commons.lang.tire.domain.Forest;
 import org.nlpcn.commons.lang.tire.domain.Value;
-import deprecated.WoodInterface;
 import org.nlpcn.commons.lang.tire.library.Library;
 
 

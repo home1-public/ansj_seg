@@ -14,10 +14,12 @@ Ansj中文分词重构项目
 分词器
     
     mvn clean compile package install;
-
+    or deploy
+    
 Lucene插件
 
     cd plug; mvn clean compile package install;
+    or deploy
     
 重构动机:
 * 非常喜欢ansj分词器, 它基本能达到预期的效果
